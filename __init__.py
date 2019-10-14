@@ -52,7 +52,7 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
     server = None
     dispatcher = None
     def print_VMC_Data_transform(self,addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w):
-        print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
+        #print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
         if (type(bone_name) is not str) \
             or (type(loc_x) is not float) or (type(loc_y) is not float) or (type(loc_z) is not float)\
             or (type(qua_x) is not float) or (type(qua_y) is not float) or (type(qua_z) is not float) or (type(qua_w) is not float):
@@ -66,13 +66,14 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
     def print_VMC_Data_blend_shape(self,addr,shape_key,shape_value):
         if (type(shape_key) is not str) or (type(shape_value) is not float):
             raise ValueError("unexpected input in vmc capture")
-        print(addr,shape_key,shape_value)
+        #print(addr,shape_key,shape_value)
         return #(shape_key,shape_value)
 
     #ゲームの開始からの秒数(float)。
     def print_VMC_time(self,addr,vmc_time):
-        print(vmc_time)
-
+        #print(vmc_time)
+        pass
+    
     def modal(self, context, event):
         if event.type in {'ESC'}:
             self.server.shutdown()
