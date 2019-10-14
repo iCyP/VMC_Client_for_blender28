@@ -59,8 +59,9 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
             raise ValueError("unexpected input in vmc capture")
         loc = (loc_x, loc_z ,-loc_y)
         quat = Quaternion([qua_w,qua_x, qua_y, qua_z]) @ self._axis_tranlation_quatanion
-        self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].location = loc
-        self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].rotation_quaternion = quat
+        if self.armature_obj.data[bone_name] in self.armature_obj.data.bones:
+            self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].location = loc
+            self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].rotation_quaternion = quat
         return #(bone_name, loc, quat)
 
     def print_VMC_Data_blend_shape(self,addr,shape_key,shape_value):
