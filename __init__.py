@@ -5,6 +5,7 @@ from math import radians
 from . import dispatcher,osc_server
 from mathutils import Quaternion,Vector
 import bpy
+from .humanoid_controller import ICYP_PT_VMC_Client_controller,Add_reqwire_humanbone_custom_propaty,Add_defined_humanbone_custom_propaty
 
 
 bl_info = {
@@ -30,7 +31,12 @@ class ICYP_VMC_Client_PT_controller(bpy.types.Panel):
     bl_category = "VMC Client"
     @classmethod
     def poll(self, context):
-        return True
+        try:
+            if context.active_object.type == "ARMATURE":
+                return True
+        except:
+            pass
+        return False
 
     def draw(self, context):
         self.layout.operator(ICYP_OP_VMC_Client.bl_idname)
@@ -42,21 +48,23 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
     bl_description = "start vmc client"
     bl_options = {'REGISTER', 'UNDO'}
 
-    _axis_tranlation_quatanion =  Quaternion(Vector([0,0,0]),radians(180)) @ Quaternion(Vector([1,0,0]),radians(-90))
+    _axis_tranlation_quatanion =  Quaternion(Vector([0,1,0]),radians(180)) @ Quaternion(Vector([1,0,0]),radians(-90))
     server = None
     dispatcher = None
     def print_VMC_Data_transform(self,addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w):
         print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
-        if bone_name is not str \
-            or loc_y is not float or loc_y is not float or loc_z is not float\
-            or qua_x is not float or qua_y is not float or qua_z is not float or qua_w is not float:
+        if (type(bone_name) is not str) \
+            or (type(loc_x) is not float) or (type(loc_y) is not float) or (type(loc_z) is not float)\
+            or (type(qua_x) is not float) or (type(qua_y) is not float) or (type(qua_z) is not float) or (type(qua_w) is not float):
             raise ValueError("unexpected input in vmc capture")
-        loc = (loc_x, loc_y, loc_z)
-        quat = (qua_x, qua_y, qua_z, qua_w) @ self._axis_tranlation_quatanion
+        loc = (loc_x, loc_z ,-loc_y)
+        quat = Quaternion([qua_w,qua_x, qua_y, qua_z]) @ self._axis_tranlation_quatanion
+        self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].location = loc
+        self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].rotation_quaternion = quat
         return #(bone_name, loc, quat)
 
     def print_VMC_Data_blend_shape(self,addr,shape_key,shape_value):
-        if shape_key is not str or shape_value is not float:
+        if (type(shape_key) is not str) or (type(shape_value) is not float):
             raise ValueError("unexpected input in vmc capture")
         print(addr,shape_key,shape_value)
         return #(shape_key,shape_value)
@@ -66,28 +74,21 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
         print(vmc_time)
 
     def modal(self, context, event):
-        if event.type == 'LEFTMOUSE':
-            self.server.shutdown()
-            self.server.server_close()
-            context.window_manager.event_timer_remove(self.timer)
-            print("VMC client closed")
-            return {'FINISHED'}
-
-        elif event.type in {'RIGHTMOUSE', 'ESC'}:
+        if event.type in {'ESC'}:
             self.server.shutdown()
             self.server.server_close()
             context.window_manager.event_timer_remove(self.timer)
             print("VMC client canceled")
-            return {'CANCELLED'}
+            return {'FINISHED'}
         elif event.type == "TIMER":
             # do something
-            print("modal running")
             pass
 
         return {'PASS_THROUGH'}
 
 
     def execute(self, context):
+        self.armature_obj = context.active_object
         self.timer = context.window_manager.event_timer_add(0.01,window = context.window)
         context.window_manager.modal_handler_add(self)
         self.dispatcher = dispatcher.Dispatcher()
@@ -103,7 +104,10 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
 
 classes = [
     ICYP_OP_VMC_Client,
-    ICYP_VMC_Client_PT_controller
+    ICYP_VMC_Client_PT_controller,
+    ICYP_PT_VMC_Client_controller,
+    Add_reqwire_humanbone_custom_propaty,
+    Add_defined_humanbone_custom_propaty
 ]
 
 
