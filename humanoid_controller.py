@@ -7,6 +7,15 @@ humanoid_requires= [
     "leftUpperArm","leftLowerArm","leftHand",
     "rightUpperArm","rightLowerArm","rightHand"
 ]
+
+OSC_humanoid_requires= [
+    "Hips","Spine","Chest","Neck","Head",
+    "LeftUpperLeg","LeftLowerLeg","LeftFoot",
+    "RightUpperLeg","RightLowerLeg","RightFoot",
+    "LeftUpperArm","LeftLowerArm","LeftHand",
+    "RightUpperArm","RightLowerArm","RightHand"
+]
+req_dic = {o:h for h,o in zip(humanoid_requires,OSC_humanoid_requires)}
 humanoid_defines =  [
     "jaw",
     "leftEye","rightEye",
@@ -25,6 +34,26 @@ humanoid_defines =  [
     "rightRingProximal","rightRingIntermediate","rightRingDistal",
     "rightLittleProximal","rightLittleIntermediate","rightLittleDistal"
             ]
+
+OSC_humanoid_defines =  [
+    "Jaw",
+    "LeftEye","RightEye",
+    "LeftShoulder","RightShoulder",
+    "UpperChest",
+    "LeftToes","RightToes",
+
+    "LeftThumbProximal","LeftThumbIntermediate","LeftThumbDistal","LeftIndexProximal",
+    "LeftIndexIntermediate","LeftIndexDistal","LeftMiddleProximal","LeftMiddleIntermediate",
+    "LeftMiddleDistal","LeftRingProximal","LeftRingIntermediate","LeftRingDistal",
+    "LeftLittleProximal","LeftLittleIntermediate","LeftLittleDistal",
+    
+    "RightThumbProximal","RightThumbIntermediate","RightThumbDistal",
+    "RightIndexProximal","RightIndexIntermediate","RightIndexDistal",
+    "RightMiddleProximal","RightMiddleIntermediate","RightMiddleDistal",
+    "RightRingProximal","RightRingIntermediate","RightRingDistal",
+    "RightLittleProximal","RightLittleIntermediate","RightLittleDistal"
+            ]
+def_dic = {o:h for h,o in zip(humanoid_defines,OSC_humanoid_defines)}
 
 class ICYP_PT_VMC_Client_controller(bpy.types.Panel):
     bl_idname = "ICYP_PT_VM_Client_bone_panel_controller"

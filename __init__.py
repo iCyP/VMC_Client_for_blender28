@@ -5,7 +5,9 @@ from math import radians
 from . import dispatcher,osc_server
 from mathutils import Quaternion,Vector
 import bpy
-from .humanoid_controller import ICYP_PT_VMC_Client_controller,Add_reqwire_humanbone_custom_propaty,Add_defined_humanbone_custom_propaty
+from .humanoid_controller \
+    import ICYP_PT_VMC_Client_controller, Add_reqwire_humanbone_custom_propaty, Add_defined_humanbone_custom_propaty, \
+            def_dic,req_dic
 
 
 bl_info = {
@@ -52,41 +54,33 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
     server = None
     dispatcher = None
     def print_VMC_Data_transform_root(self,addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w,s_x,s_y,s_z,o_x,o_y,o_z):
-        print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
-        """if (type(bone_name) is not str) \
+        #print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
+        if (type(bone_name) is not str) \
             or (type(loc_x) is not float) or (type(loc_y) is not float) or (type(loc_z) is not float)\
             or (type(qua_x) is not float) or (type(qua_y) is not float) or (type(qua_z) is not float) or (type(qua_w) is not float):
             raise ValueError("unexpected input in vmc capture")
-        """
         loc = (loc_x, loc_z ,-loc_y)
-        quat = Quaternion([qua_w,qua_x, qua_y, qua_z]) @ self._axis_tranlation_quatanion
-        """if self.armature_obj.data[bone_name] in self.armature_obj.data.bones:
-            self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].location = loc
-            self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].rotation_quaternion = quat
-        """
-        if bone_name in self.armature_obj.data.bones:
-            self.armature_obj.pose.bones[bone_name].location = loc
-            self.armature_obj.pose.bones[bone_name].rotation_quaternion = quat
+        quat = Quaternion([qua_w,qua_x, qua_y, qua_z]) #@ self._axis_tranlation_quatanion
+        if "root" in self.armature_obj.data.bones:
+            self.armature_obj.pose.bones["root"].location = loc
+            self.armature_obj.pose.bones["root"].rotation_quaternion = quat
         return #(bone_name, loc, quat)
 
     def print_VMC_Data_transform(self,addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w):
-        print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
-        """if (type(bone_name) is not str) \
+        #print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
+        if (type(bone_name) is not str) \
             or (type(loc_x) is not float) or (type(loc_y) is not float) or (type(loc_z) is not float)\
             or (type(qua_x) is not float) or (type(qua_y) is not float) or (type(qua_z) is not float) or (type(qua_w) is not float):
             raise ValueError("unexpected input in vmc capture")
-        """
-        loc = (loc_x, loc_z ,-loc_y)
-        quat = Quaternion([qua_w,qua_x, qua_y, qua_z]) @ self._axis_tranlation_quatanion
-        """
+        loc = (loc_x, loc_y, loc_z)
+        if bone_name in req_dic.keys():
+            bone_name = req_dic[bone_name]
+        else:
+            bone_name = def_dic[bone_name]
+        quat = Quaternion([qua_w,qua_x, qua_y, qua_z]) #@ self._axis_tranlation_quatanion
         if self.armature_obj.data[bone_name] in self.armature_obj.data.bones:
             self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].location = loc
             self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].rotation_quaternion = quat
-    
-        """
-        if bone_name in self.armature_obj.data.bones:
-            self.armature_obj.pose.bones[bone_name].location = loc
-            self.armature_obj.pose.bones[bone_name].rotation_quaternion = quat
         return  #(bone_name, loc, quat)
         
     def print_VMC_Data_blend_shape(self,addr,shape_key,shape_value):
@@ -97,7 +91,7 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
 
     #ゲームの開始からの秒数(float)。
     def print_VMC_time(self,addr,vmc_time):
-        print(f"-----{vmc_time}-----")
+        #print(vmc_time)
         pass
     
     def modal(self, context, event):
