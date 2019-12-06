@@ -51,19 +51,44 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
     _axis_tranlation_quatanion =  Quaternion(Vector([0,1,0]),radians(180)) @ Quaternion(Vector([1,0,0]),radians(-90))
     server = None
     dispatcher = None
-    def print_VMC_Data_transform(self,addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w):
-        #print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
-        if (type(bone_name) is not str) \
+    def print_VMC_Data_transform_root(self,addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w,s_x,s_y,s_z,o_x,o_y,o_z):
+        print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
+        """if (type(bone_name) is not str) \
             or (type(loc_x) is not float) or (type(loc_y) is not float) or (type(loc_z) is not float)\
             or (type(qua_x) is not float) or (type(qua_y) is not float) or (type(qua_z) is not float) or (type(qua_w) is not float):
             raise ValueError("unexpected input in vmc capture")
+        """
         loc = (loc_x, loc_z ,-loc_y)
         quat = Quaternion([qua_w,qua_x, qua_y, qua_z]) @ self._axis_tranlation_quatanion
+        """if self.armature_obj.data[bone_name] in self.armature_obj.data.bones:
+            self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].location = loc
+            self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].rotation_quaternion = quat
+        """
+        if bone_name in self.armature_obj.data.bones:
+            self.armature_obj.pose.bones[bone_name].location = loc
+            self.armature_obj.pose.bones[bone_name].rotation_quaternion = quat
+        return #(bone_name, loc, quat)
+
+    def print_VMC_Data_transform(self,addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w):
+        print(addr, bone_name, loc_x, loc_y, loc_z, qua_x, qua_y, qua_z, qua_w)
+        """if (type(bone_name) is not str) \
+            or (type(loc_x) is not float) or (type(loc_y) is not float) or (type(loc_z) is not float)\
+            or (type(qua_x) is not float) or (type(qua_y) is not float) or (type(qua_z) is not float) or (type(qua_w) is not float):
+            raise ValueError("unexpected input in vmc capture")
+        """
+        loc = (loc_x, loc_z ,-loc_y)
+        quat = Quaternion([qua_w,qua_x, qua_y, qua_z]) @ self._axis_tranlation_quatanion
+        """
         if self.armature_obj.data[bone_name] in self.armature_obj.data.bones:
             self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].location = loc
             self.armature_obj.pose.bones[self.armature_obj.data[bone_name]].rotation_quaternion = quat
-        return #(bone_name, loc, quat)
-
+    
+        """
+        if bone_name in self.armature_obj.data.bones:
+            self.armature_obj.pose.bones[bone_name].location = loc
+            self.armature_obj.pose.bones[bone_name].rotation_quaternion = quat
+        return  #(bone_name, loc, quat)
+        
     def print_VMC_Data_blend_shape(self,addr,shape_key,shape_value):
         if (type(shape_key) is not str) or (type(shape_value) is not float):
             raise ValueError("unexpected input in vmc capture")
@@ -72,7 +97,7 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
 
     #ゲームの開始からの秒数(float)。
     def print_VMC_time(self,addr,vmc_time):
-        #print(vmc_time)
+        print(f"-----{vmc_time}-----")
         pass
     
     def modal(self, context, event):
@@ -94,11 +119,11 @@ class ICYP_OP_VMC_Client(bpy.types.Operator):
         self.timer = context.window_manager.event_timer_add(0.01,window = context.window)
         context.window_manager.modal_handler_add(self)
         self.dispatcher = dispatcher.Dispatcher()
-        self.dispatcher.map("/VMC/Ext/Root/Pos", self.print_VMC_Data_transform)
+        self.dispatcher.map("/VMC/Ext/Root/Pos", self.print_VMC_Data_transform_root)
         self.dispatcher.map("/VMC/Ext/Bone/Pos", self.print_VMC_Data_transform)
         self.dispatcher.map("/VMC/Ext/Blend/Val",self.print_VMC_Data_blend_shape)
         self.dispatcher.map("/VMC/Ext/T", self.print_VMC_time)
-        self.server = osc_server.ThreadingOSCUDPServer(("127.0.0.1",3333),self.dispatcher)
+        self.server = osc_server.ThreadingOSCUDPServer(("127.0.0.1",39539),self.dispatcher)
         self.server.timeout = 0.01
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.start()
